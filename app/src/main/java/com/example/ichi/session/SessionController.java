@@ -1,5 +1,7 @@
 package com.example.ichi.session;
 
+import android.content.Context;
+
 import java.net.*;
 import java.util.List;
 
@@ -10,45 +12,11 @@ import java.util.List;
  *
  * Created by ichiYuan on 4/1/15.
  */
-public class SessionController implements CookieStore {
+public class SessionController {
 
     // set default connections handled by itself
-    public SessionController() {
-        CookieManager cookieManager = new CookieManager(this,null);
-        CookieHandler.setDefault(cookieManager);
+    public SessionController(Context context) {
+        CookieHandler.setDefault( new CookieManager( new PersistentCookieStore(context), CookiePolicy.ACCEPT_ALL ) );
     }
 
-    @Override
-    public void add(URI uri, HttpCookie cookie) {
-
-    }
-
-    @Override
-    public List<HttpCookie> get(URI uri) {
-        return null;
-    }
-
-    @Override
-    public List<HttpCookie> getCookies() {
-        return null;
-    }
-
-    @Override
-    public List<URI> getURIs() {
-        return null;
-    }
-
-    @Override
-    public boolean remove(URI uri, HttpCookie cookie) {
-        return false;
-    }
-
-    @Override
-    public boolean removeAll() {
-        return false;
-    }
-
-    // Need to implement I/O to persistent storage
-    private void readFromStore() {}
-    private void writeToStore() {}
 }

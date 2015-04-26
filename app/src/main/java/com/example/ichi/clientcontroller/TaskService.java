@@ -6,9 +6,11 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.Pair;
 
+import com.example.ichi.servercomm.CollectionUtils;
 import com.example.ichi.servercomm.HTTPRequest;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * This is the Client Controller. Android's IntentService
@@ -39,10 +41,10 @@ public class TaskService extends IntentService {
             receiver.send(STATUS_RUNNING, Bundle.EMPTY);
             try {
                 HTTPRequest req = new HTTPRequest();
-                String results = req.request(intent.getStringExtra("url"),
+                ArrayList<String> results = req.request(intent.getStringExtra("url"),
                         intent.getStringExtra("method"),
-                        (ArrayList<Pair<String, String>>) intent.getParcelableExtra("params"));
-                b.putString("results", results);
+                        CollectionUtils.fromBundle(intent.getBundleExtra("params")));
+                b.putStringArrayList("results", results);
                 receiver.send(STATUS_FINISHED, b);
             } catch (Exception e) {
                 b.putString(Intent.EXTRA_TEXT, e.toString());

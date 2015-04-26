@@ -1,7 +1,11 @@
 package com.example.ichi.myapplication;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -10,6 +14,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,9 +22,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.ichi.clientcontroller.MyResultReceiver;
+import com.example.ichi.servercomm.HTTPRequest;
+import com.example.ichi.session.SessionController;
 
 
-public class MainActivity extends ActionBarActivity implements ActionBar.TabListener, MyResultReceiver.Receiver {
+public class MainActivity extends ActionBarActivity implements ActionBar.TabListener, MyResultReceiver.Receiver, MicropostFragment.OnFragmentInteractionListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -40,6 +47,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        new SessionController(getApplicationContext());
 
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -63,6 +71,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             }
         });
 
+
+        mMicropostFragment = MicropostFragment.newInstance("micropost","[]");
+
         // For each of the sections in the app, add a tab to the action bar.
         for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
             // Create a tab with text corresponding to the page title defined by
@@ -74,6 +85,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
         }
+
+        sendRequestMicroposts();
     }
 
 
@@ -114,6 +127,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
     }
 
+    @Override
+    public void onFragmentInteraction(String id) {
+
+    }
+
+    MicropostFragment mMicropostFragment;
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -126,6 +145,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         @Override
         public Fragment getItem(int position) {
+            if (position == 0) {
+                return mMicropostFragment;
+            }
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             return PlaceholderFragment.newInstance(position + 1);
@@ -193,10 +215,33 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             case FINISHED:
                 // do something interesting
                 // hide progress
+                ArrayList<String> results = resultData.getStringArrayList("results");
+                if (results != null) {
+                    Log.d("Debug:\t", results.get(0));
+                    if (results.get(0).startsWith("INVALID")) {
+                        Log.d("Debug:\t",results.get(0));
+
+                    }
+                    else if (results.get(0).startsWith("NEW USER")) {
+
+                    }
+                    else {
+                        mMicropostFragment.loadData(results.get(0));
+                    }
+                }
+                //showProgress(false);
                 break;
             case ERROR:
                 // handle the error;
                 break;
         }
+    }
+
+    void sendRequestMicroposts() {
+        String url = "https://rails-tutorial-cosimo-dw.c9.io/anonyposts.json";
+
+        Intent intent = HTTPRequest.makeIntent(this, this, url,"GET",null);
+
+        startService(intent);
     }
 }
