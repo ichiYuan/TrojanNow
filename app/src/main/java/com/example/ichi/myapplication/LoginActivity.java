@@ -356,7 +356,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
         params.put("session[password]",password);
         params.put("session[remember_me]", "1");
 
-        Intent intent = HTTPRequest.makeIntent(this, this, url, "PUT", params);
+        Intent intent = HTTPRequest.makeIntent(this, this, url, "POST", params);
 
         startService(intent);
     }
