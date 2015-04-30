@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -29,28 +30,35 @@ import java.util.List;
  * A fragment representing a list of Items.
  * <p/>
  * <p/>
- * Activities containing this fragment MUST implement the {@link OnMicropostFragmentInteractionListener}
+ * Activities containing this fragment MUST implement the {@link OnUserFragmentInteractionListener}
  * interface.
  */
-public class MicropostFragment extends ListFragment implements MyResultReceiver.Receiver {
+public class UserFragment extends ListFragment implements MyResultReceiver.Receiver {
 
-    private OnMicropostFragmentInteractionListener mListener;
+    private int id;
 
-    private List<MicropostItem> mMicroposts;
-    private MicropostAdapter mAdapter;
+    private OnUserFragmentInteractionListener mListener;
+
+    private List<UserItem> mUsers;
+    private UserAdapter mAdapter;
 
     // TODO: Rename and change types of parameters
-    public static MicropostFragment newInstance() {
-        MicropostFragment fragment = new MicropostFragment();
+    public static UserFragment newInstance(int id) {
+        UserFragment fragment = new UserFragment();
+        fragment.setId(id);
         return fragment;
+    }
+
+    public void setId(int ID) {
+        id = ID;
     }
 
     public void loadData(String content) {
         Gson gson = new Gson();
-        Type listType = new TypeToken<List<MicropostItem>>(){}.getType();
-        mMicroposts = (List<MicropostItem>) gson.fromJson(content, listType);
+        Type listType = new TypeToken<List<UserItem>>(){}.getType();
+        mUsers = (List<UserItem>) gson.fromJson(content, listType);
         mAdapter.clear();
-        mAdapter.addAll(mMicroposts);
+        mAdapter.addAll(mUsers);
         mAdapter.notifyDataSetChanged();
     }
 
@@ -58,24 +66,42 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public MicropostFragment() {
+    public UserFragment() {
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mMicroposts = new ArrayList<MicropostItem>();
-        // TODO: Change Adapter to display your content
-        mAdapter = new MicropostAdapter(mMicroposts);
+        mUsers = new ArrayList<UserItem>();
+        mAdapter = new UserAdapter(mUsers);
         setListAdapter(mAdapter);
-        sendRequestMicroposts();
+        sendRequestUsers(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View myFragmentView = inflater.inflate(R.layout.micropost_layout, container, false);
+        View myFragmentView = inflater.inflate(R.layout.user_layout, container, false);
+        Button button = (Button) myFragmentView.findViewById(R.id.following_button);
+        button.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                sendRequestUsers(true);
+            }
+        });
+        button = (Button) myFragmentView.findViewById(R.id.followers_button);
+        button.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                sendRequestUsers(false);
+            }
+        });
+
         return myFragmentView;
     }
 
@@ -93,10 +119,6 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
                     Log.d("Debug:\t", results.get(0));
                     if (results.get(0).startsWith("INVALID")) {
                         Log.d("Debug:\t",results.get(0));
-
-                    }
-                    else if (results.get(0).startsWith("NEW USER")) {
-
                     }
                     else {
                         loadData(results.get(0));
@@ -110,41 +132,38 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
         }
     }
 
-    public void sendRequestMicroposts() {
-        String url = "https://rails-tutorial-cosimo-dw.c9.io/anonyposts.json";
+    public void sendRequestUsers(boolean following) {
+        if (id < 0)
+            return;
+        String url = "https://rails-tutorial-cosimo-dw.c9.io/users/"+id+"/"+(following?"following":"followers")+".json";
 
         Intent intent = HTTPRequest.makeIntent(getActivity(), this, url, "GET", null);
 
         getActivity().startService(intent);
     }
 
-    private class MicropostItem{
+    private class UserItem{
         int id;
-        String content;
-        String display_user;
-        String environment;
+        String name;
         String url;
     }
 
-    private class MicropostAdapter extends ArrayAdapter<MicropostItem>{
+    private class UserAdapter extends ArrayAdapter<UserItem>{
 
-        public MicropostAdapter(List<MicropostItem> mMicroposts) {
-            super(getActivity(), 0, mMicroposts);
+        public UserAdapter(List<UserItem> mUsers) {
+            super(getActivity(), 0, mUsers);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if(convertView == null) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.micropost_item, null);
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.user_item, null);
             }
 
-            MicropostItem micropost = getItem(position);
+            UserItem User = getItem(position);
 
-            TextView nameText = (TextView)convertView.findViewById(R.id.micropost_user);
-            nameText.setText(micropost.display_user);
-
-            TextView contentText = (TextView)convertView.findViewById(R.id.micropost_content);
-            contentText.setText(micropost.content);
+            TextView senderText = (TextView)convertView.findViewById(R.id.user_name);
+            senderText.setText(User.name);
 
             return convertView;
         }
@@ -155,7 +174,7 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnMicropostFragmentInteractionListener) activity;
+            mListener = (OnUserFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -176,7 +195,7 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onMicropostFragmentInteraction(mMicroposts.get(position).url);
+            mListener.onUserFragmentInteraction(mUsers.get(position).url);
         }
     }
 
@@ -190,9 +209,9 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnMicropostFragmentInteractionListener {
+    public interface OnUserFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onMicropostFragmentInteraction(String id);
+        public void onUserFragmentInteraction(String id);
     }
 
 }

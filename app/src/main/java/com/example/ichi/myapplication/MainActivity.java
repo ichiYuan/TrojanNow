@@ -1,7 +1,9 @@
 package com.example.ichi.myapplication;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -15,6 +17,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,9 +27,16 @@ import android.view.ViewGroup;
 import com.example.ichi.clientcontroller.MyResultReceiver;
 import com.example.ichi.servercomm.HTTPRequest;
 import com.example.ichi.session.SessionController;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 
-public class MainActivity extends ActionBarActivity implements ActionBar.TabListener, MyResultReceiver.Receiver, MicropostFragment.OnMicropostFragmentInteractionListener {
+public class MainActivity extends ActionBarActivity implements ActionBar.TabListener,
+        MyResultReceiver.Receiver,
+        MicropostFragment.OnMicropostFragmentInteractionListener,
+        MsgFragment.OnMsgFragmentInteractionListener,
+        UserFragment.OnUserFragmentInteractionListener
+{
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -37,6 +47,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     SectionsPagerAdapter mSectionsPagerAdapter;
+    int id = -1;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -71,9 +82,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 actionBar.setSelectedNavigationItem(position);
             }
         });
-
-
-        mMicropostFragment = MicropostFragment.newInstance("micropost","[]");
 
         // For each of the sections in the app, add a tab to the action bar.
         for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
@@ -133,12 +141,22 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     }
 
-    MicropostFragment mMicropostFragment;
+    @Override
+    public void onMsgFragmentInteraction(String id) {
+
+    }
+
+    @Override
+    public void onUserFragmentInteraction(String id) {
+
+    }
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
+        SparseArray<Fragment> registeredFragments = new SparseArray<Fragment>();
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -146,8 +164,18 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         @Override
         public Fragment getItem(int position) {
-            if (position == 0) {
-                return mMicropostFragment;
+            switch (position) {
+                case 0:
+                    MicropostFragment mMicropostFragment = MicropostFragment.newInstance();
+                    return mMicropostFragment;
+                case 1:
+                    UserFragment mUserFragment = UserFragment.newInstance(id);
+                    mUserFragment.setId(id);
+                    return mUserFragment;
+                case 2:
+                    MsgFragment mMsgFragment = MsgFragment.newInstance(id);
+                    mMsgFragment.setId(id);
+                    return mMsgFragment;
             }
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
@@ -172,6 +200,23 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     return getString(R.string.title_section3).toUpperCase(l);
             }
             return null;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            Fragment fragment = (Fragment) super.instantiateItem(container, position);
+            registeredFragments.put(position, fragment);
+            return fragment;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            registeredFragments.remove(position);
+            super.destroyItem(container, position, object);
+        }
+
+        public Fragment getRegisteredFragment(int position) {
+            return registeredFragments.get(position);
         }
     }
 
@@ -207,7 +252,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             return rootView;
         }
     }
-
+    private class SimpleUserItem{
+        int id;
+    }
     public void onReceiveResult(int resultCode, Bundle resultData) {
         switch (resultCode) {
             case RUNNING:
@@ -225,8 +272,22 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                         startActivity(intent);
                     }
                     else {
+                        Gson gson = new Gson();
+                        Type listType = new TypeToken<SimpleUserItem>(){}.getType();
+                        SimpleUserItem curUser = (SimpleUserItem) gson.fromJson(results.get(0), listType);
+
+                        id = curUser.id;
+                        MicropostFragment frg = (MicropostFragment)mSectionsPagerAdapter.getRegisteredFragment(0);
+                        if (frg != null)
+                            frg.sendRequestMicroposts();
+                        UserFragment frg2 = (UserFragment)mSectionsPagerAdapter.getRegisteredFragment(1);
+                        if (frg2 != null)
+                            frg2.setId(id);
+                        MsgFragment frg3 = (MsgFragment)mSectionsPagerAdapter.getRegisteredFragment(2);
+                        if (frg3 != null)
+                            frg3.setId(id);
                         mViewPager.setVisibility(View.VISIBLE);
-                        mMicropostFragment.sendRequestMicroposts();
+
                     }
                 }
                 //showProgress(false);

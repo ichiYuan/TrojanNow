@@ -8,6 +8,28 @@
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_marginTop="0dp" android:hint="search friend"
         android:textStyle="bold" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Following"
+            android:id="@+id/following_button"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Followers"
+            android:id="@+id/followers_button"
+            android:layout_weight="1" />
+    </LinearLayout>
+
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"

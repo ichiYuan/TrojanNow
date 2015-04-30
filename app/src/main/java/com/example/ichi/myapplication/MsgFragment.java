@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -34,14 +35,7 @@ import java.util.List;
  */
 public class MsgFragment extends ListFragment implements MyResultReceiver.Receiver {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_TYPE = "type";
-    private static final String ARG_CONTENT = "content";
-
-    // TODO: Rename and change types of parameters
-    private String type;
-    private String content;
+    private int id;
 
     private OnMsgFragmentInteractionListener mListener;
 
@@ -49,13 +43,14 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
     private MsgAdapter mAdapter;
 
     // TODO: Rename and change types of parameters
-    public static MsgFragment newInstance(String type, String content) {
+    public static MsgFragment newInstance(int id) {
         MsgFragment fragment = new MsgFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_TYPE, type);
-        args.putString(ARG_CONTENT, content);
-        fragment.setArguments(args);
+        fragment.setId(id);
         return fragment;
+    }
+
+    public void setId(int ID) {
+        id = ID;
     }
 
     public void loadData(String content) {
@@ -78,23 +73,35 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            type = getArguments().getString(ARG_TYPE);
-            content = getArguments().getString(ARG_CONTENT);
-        }
-
-        Gson gson = new Gson();
-        Type listType = new TypeToken<List<MsgItem>>(){}.getType();
-        mMessages = (List<MsgItem>) gson.fromJson(content, listType);
-        // TODO: Change Adapter to display your content
+        mMessages = new ArrayList<MsgItem>();
         mAdapter = new MsgAdapter(mMessages);
         setListAdapter(mAdapter);
+        sendRequestMessages(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View myFragmentView = inflater.inflate(R.layout.msg_layout, container, false);
+        Button button = (Button) myFragmentView.findViewById(R.id.inbox_button);
+        button.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                sendRequestMessages(true);
+            }
+        });
+        button = (Button) myFragmentView.findViewById(R.id.outbox_button);
+        button.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                sendRequestMessages(false);
+            }
+        });
+
         return myFragmentView;
     }
 
@@ -112,10 +119,6 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
                     Log.d("Debug:\t", results.get(0));
                     if (results.get(0).startsWith("INVALID")) {
                         Log.d("Debug:\t",results.get(0));
-
-                    }
-                    else if (results.get(0).startsWith("NEW USER")) {
-
                     }
                     else {
                         loadData(results.get(0));
@@ -129,8 +132,10 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
         }
     }
 
-    public void sendRequestMessages() {
-        String url = "https://rails-tutorial-cosimo-dw.c9.io/anonyposts.json";
+    public void sendRequestMessages(boolean inbox) {
+        if (id < 0)
+            return;
+        String url = "https://rails-tutorial-cosimo-dw.c9.io/users/"+id+"/"+(inbox?"inbox":"outbox")+".json";
 
         Intent intent = HTTPRequest.makeIntent(getActivity(), this, url, "GET", null);
 
@@ -139,9 +144,9 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
 
     private class MsgItem{
         int id;
-        String receiver;
+        String receiver_name;
         String content;
-        String sender;
+        String sender_name;
         String url;
     }
 
@@ -160,13 +165,13 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
             MsgItem Msg = getItem(position);
 
             TextView senderText = (TextView)convertView.findViewById(R.id.message_sender);
-            senderText.setText(Msg.sender);
+            senderText.setText(Msg.sender_name);
 
             TextView contentText = (TextView)convertView.findViewById(R.id.message_content);
             contentText.setText(Msg.content);
 
             TextView receiverText = (TextView)convertView.findViewById(R.id.message_receiver);
-            receiverText.setText(Msg.receiver);
+            receiverText.setText(Msg.receiver_name);
 
             return convertView;
         }
