@@ -332,7 +332,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
                         mPasswordView.requestFocus();
                     }
                     else if (results.get(0).startsWith("NEW USER")) {
-
+                        Intent intent = new Intent();
+                        intent.setClass(this,RegisterActivity.class);
+                        startActivity(intent);
                     }
                     else {
                         finish();
@@ -361,10 +363,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
         startService(intent);
     }
 
-    // send registration info to the server
-    void sendRegistration(String email, String password, String first_name, String last_name, String user_name) {
 
-    }
 }
 
 

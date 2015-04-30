@@ -26,7 +26,7 @@ import com.example.ichi.servercomm.HTTPRequest;
 import com.example.ichi.session.SessionController;
 
 
-public class MainActivity extends ActionBarActivity implements ActionBar.TabListener, MyResultReceiver.Receiver, MicropostFragment.OnFragmentInteractionListener {
+public class MainActivity extends ActionBarActivity implements ActionBar.TabListener, MyResultReceiver.Receiver, MicropostFragment.OnMicropostFragmentInteractionListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -59,6 +59,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.setVisibility(View.INVISIBLE);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         // When swiping between different sections, select the corresponding
@@ -86,7 +87,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                             .setTabListener(this));
         }
 
-        sendRequestMicroposts();
+        checkLogin();
     }
 
 
@@ -128,7 +129,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     @Override
-    public void onFragmentInteraction(String id) {
+    public void onMicropostFragmentInteraction(String id) {
 
     }
 
@@ -218,15 +219,14 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 ArrayList<String> results = resultData.getStringArrayList("results");
                 if (results != null) {
                     Log.d("Debug:\t", results.get(0));
-                    if (results.get(0).startsWith("INVALID")) {
-                        Log.d("Debug:\t",results.get(0));
-
-                    }
-                    else if (results.get(0).startsWith("NEW USER")) {
-
+                    if (results.get(0).startsWith("NOT LOGGED IN")) {
+                        Intent intent = new Intent();
+                        intent.setClass(this,LoginActivity.class);
+                        startActivity(intent);
                     }
                     else {
-                        mMicropostFragment.loadData(results.get(0));
+                        mViewPager.setVisibility(View.VISIBLE);
+                        mMicropostFragment.sendRequestMicroposts();
                     }
                 }
                 //showProgress(false);
@@ -237,8 +237,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
 
-    void sendRequestMicroposts() {
-        String url = "https://rails-tutorial-cosimo-dw.c9.io/anonyposts.json";
+    void checkLogin() {
+        String url = "https://rails-tutorial-cosimo-dw.c9.io/check.json";
 
         Intent intent = HTTPRequest.makeIntent(this, this, url,"GET",null);
 

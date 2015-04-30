@@ -1,11 +1,16 @@
 package com.example.ichi.myapplication;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.ichi.clientcontroller.MyResultReceiver;
+import com.example.ichi.servercomm.HTTPRequest;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class EditTwitteeActivity extends ActionBarActivity implements MyResultReceiver.Receiver {
@@ -56,6 +61,15 @@ public class EditTwitteeActivity extends ActionBarActivity implements MyResultRe
 
     // send twit to server
     void sendMicropost(String content, Boolean anonymous, Boolean sensor) {
+        String url = "https://rails-tutorial-cosimo-dw.c9.io/microposts/new.json";
+        Map<String,String> params = new HashMap<String,String>();
+        params.put("micropost[content]", content);
+        params.put("micropost[anony]", anonymous?"1":"0");
+        //TODO environment
+        params.put("[remember_me]", "1");
 
+        Intent intent = HTTPRequest.makeIntent(this, this, url, "POST", params);
+
+        startService(intent);
     }
 }

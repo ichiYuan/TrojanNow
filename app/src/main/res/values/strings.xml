@@ -15,4 +15,13 @@
     <string name="title_activity_search">SearchActivity</string>
     <string name="title_activity_edit_msg">EditMsgActivity</string>
     <string name="title_activity_edit_twittee">EditTwitteeActivity</string>
+    <string name="title_activity_register">RegisterActivity</string>
+
+    <string name="envi_choose">Choose environment info</string>
+    <string-array name="environment">
+        <item>Temperature</item>
+        <item>Location</item>
+        <item>Weather</item>
+
+    </string-array>
 </resources>
