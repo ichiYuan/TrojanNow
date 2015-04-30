@@ -25,6 +25,7 @@
         android:id="@+id/post_twittee" style="?android:textAppearanceSmall"
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_marginTop="16dp" android:text="Send Message"
+        android:background="@android:drawable/btn_default"
         android:textStyle="bold" />
 
 </LinearLayout>

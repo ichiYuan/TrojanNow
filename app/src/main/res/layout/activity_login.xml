@@ -45,7 +45,7 @@
             <Button android:id="@+id/email_sign_in_button" style="?android:textAppearanceSmall"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:layout_marginTop="16dp" android:text="@string/action_sign_in_short"
-
+                android:background="@android:drawable/btn_default"
                 android:textStyle="bold" />
 
             <TextView
@@ -62,6 +62,7 @@
             <Button android:id="@+id/email_register_button" style="?android:textAppearanceSmall"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:layout_marginTop="16dp" android:text="@string/action_register"
+                android:background="@android:drawable/btn_default"
                 android:textStyle="bold" />
         </LinearLayout>
     </ScrollView>
