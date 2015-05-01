@@ -22,13 +22,12 @@
         android:layout_gravity="left"
         android:text="Anonymous" />
 
-    <Spinner
-        android:id="@+id/spinner1"
+    <CheckBox
+        android:id="@+id/temperature"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:entries="@array/environment"
-        android:prompt="@string/envi_choose"
-        android:layout_gravity="left"/>
+        android:layout_gravity="left"
+        android:text="Temperature" />
 
     <Button android:id="@+id/post_twittee" style="?android:textAppearanceSmall"
         android:layout_width="match_parent" android:layout_height="wrap_content"

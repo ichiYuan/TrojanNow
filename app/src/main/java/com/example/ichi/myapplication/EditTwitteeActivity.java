@@ -52,6 +52,7 @@ public class EditTwitteeActivity extends ActionBarActivity implements MyResultRe
             case FINISHED:
                 // do something interesting
                 // hide progress
+                finish();
                 break;
             case ERROR:
                 // handle the error;
@@ -66,6 +67,9 @@ public class EditTwitteeActivity extends ActionBarActivity implements MyResultRe
         params.put("micropost[content]", content);
         params.put("micropost[anony]", anonymous?"1":"0");
         //TODO environment
+        String environment = null;
+        if (sensor) environment = "usc";
+        params.put("micropost[environment]",environment);
         params.put("[remember_me]", "1");
 
         Intent intent = HTTPRequest.makeIntent(this, this, url, "POST", params);
