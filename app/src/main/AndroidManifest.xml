@@ -30,21 +30,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity2Activity"
-            android:label="@string/title_activity_main_activity2" >
-        </activity>
-        <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login"
             android:windowSoftInputMode="adjustResize|stateVisible" >
-        </activity>
-        <activity
-            android:name=".FeedActivity"
-            android:label="@string/title_activity_feed"
-            android:parentActivityName=".MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.ichi.myapplication.MainActivity" />
         </activity>
         <activity
             android:name=".ProfileActivity"
@@ -65,11 +53,11 @@
         <activity
             android:name=".EditTwitteeActivity"
             android:label="@string/title_activity_edit_twittee"
-            android:parentActivityName=".FeedActivity" >
+            android:parentActivityName=".MainActivity" >
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.ichi.myapplication.FeedActivity" />
+                android:value="com.example.ichi.myapplication.MainActivity" />
         </activity>
         <activity
             android:name=".RegisterActivity"

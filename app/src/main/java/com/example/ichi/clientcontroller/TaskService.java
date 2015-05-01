@@ -8,6 +8,7 @@ import android.util.Pair;
 
 import com.example.ichi.servercomm.CollectionUtils;
 import com.example.ichi.servercomm.HTTPRequest;
+import com.example.ichi.session.SessionController;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -30,6 +31,11 @@ public class TaskService extends IntentService {
 
     public TaskService() {
         super("TaskService");
+    }
+
+    public void onCreate(){
+        super.onCreate();
+        new SessionController(getApplicationContext());
     }
 
     protected void onHandleIntent(Intent intent) {

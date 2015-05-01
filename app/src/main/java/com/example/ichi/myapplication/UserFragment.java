@@ -150,13 +150,7 @@ public class UserFragment extends ListFragment implements MyResultReceiver.Recei
                 // hide progress
                 ArrayList<String> results = resultData.getStringArrayList("results");
                 if (results != null) {
-                    Log.d("Debug:\t", results.get(0));
-                    if (results.get(0).startsWith("INVALID")) {
-                        Log.d("Debug:\t",results.get(0));
-                    }
-                    else {
-                        loadData(results.get(0));
-                    }
+                    loadData(results.get(0));
                 }
                 //showProgress(false);
                 break;
