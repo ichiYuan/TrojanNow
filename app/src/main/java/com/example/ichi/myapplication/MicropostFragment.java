@@ -1,6 +1,7 @@
 package com.example.ichi.myapplication;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -34,15 +36,22 @@ import java.util.List;
  */
 public class MicropostFragment extends ListFragment implements MyResultReceiver.Receiver {
 
+    private int id;
+
     private OnMicropostFragmentInteractionListener mListener;
 
     private List<MicropostItem> mMicroposts;
     private MicropostAdapter mAdapter;
 
     // TODO: Rename and change types of parameters
-    public static MicropostFragment newInstance() {
+    public static MicropostFragment newInstance(int id) {
         MicropostFragment fragment = new MicropostFragment();
+        fragment.setId(id);
         return fragment;
+    }
+
+    public void setId(int ID) {
+        id = ID;
     }
 
     public void loadData(String content) {
@@ -76,6 +85,18 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View myFragmentView = inflater.inflate(R.layout.micropost_layout, container, false);
+        Button mMakePostButton = (Button) myFragmentView.findViewById(R.id.makePost);
+        mMakePostButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent();
+                intent.setClass(getActivity(),EditTwitteeActivity.class);
+                startActivity(intent);
+            }
+
+        });
         return myFragmentView;
     }
 
@@ -111,7 +132,9 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
     }
 
     public void sendRequestMicroposts() {
-        String url = "https://rails-tutorial-cosimo-dw.c9.io/anonyposts.json";
+        if (id < 0)
+            return;
+        String url = "https://rails-tutorial-cosimo-dw.c9.io/users/"+id+"/microposts.json";
 
         Intent intent = HTTPRequest.makeIntent(getActivity(), this, url, "GET", null);
 

@@ -174,15 +174,13 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    MicropostFragment mMicropostFragment = MicropostFragment.newInstance();
+                    MicropostFragment mMicropostFragment = MicropostFragment.newInstance(id);
                     return mMicropostFragment;
                 case 1:
                     UserFragment mUserFragment = UserFragment.newInstance(id);
-                    mUserFragment.setId(id);
                     return mUserFragment;
                 case 2:
                     MsgFragment mMsgFragment = MsgFragment.newInstance(id);
-                    mMsgFragment.setId(id);
                     return mMsgFragment;
             }
             // getItem is called to instantiate the fragment for the given page.

@@ -5,6 +5,10 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 
 import com.example.ichi.clientcontroller.MyResultReceiver;
 import com.example.ichi.servercomm.HTTPRequest;
@@ -14,11 +18,24 @@ import java.util.Map;
 
 
 public class EditTwitteeActivity extends ActionBarActivity implements MyResultReceiver.Receiver {
-
+    EditText mText;
+    CheckBox mAnonymous;
+    CheckBox mSensor;
+    Button mPostButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_twittee);
+        mText = (EditText) findViewById(R.id.twittee);
+        mAnonymous = (CheckBox) findViewById(R.id.anonymous);
+        mSensor = (CheckBox) findViewById(R.id.temperature);
+        mPostButton = (Button) findViewById(R.id.post_twittee);
+        mPostButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMicropost(mText.getText().toString(),mAnonymous.isChecked(),mSensor.isChecked());
+            }
+        });
     }
 
 
