@@ -115,12 +115,20 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            sendRequestLogout();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    public void sendRequestLogout(){
+        String url = "https://rails-tutorial-cosimo-dw.c9.io/logout.json";
+        //todo
+        Intent intent = HTTPRequest.makeIntent(this, this, url, "DELETE", null);
+        startService(intent);
+        return;
+    }
     @Override
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
         // When the given tab is selected, switch to the corresponding page in
@@ -289,6 +297,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                         mViewPager.setVisibility(View.VISIBLE);
 
                     }
+                }
+                else {
+                    checkLogin();
                 }
                 //showProgress(false);
                 break;

@@ -88,6 +88,7 @@ public class RegisterActivity extends ActionBarActivity implements MyResultRecei
                         //TODO
                     }
                     else {
+
                         finish();
                     }
                 }
