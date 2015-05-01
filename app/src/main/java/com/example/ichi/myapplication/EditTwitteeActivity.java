@@ -33,7 +33,7 @@ public class EditTwitteeActivity extends ActionBarActivity implements MyResultRe
         mPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMicropost(mText.getText().toString(),mAnonymous.isChecked(),mSensor.isChecked());
+                sendMicropost(mText.getText().toString(), mAnonymous.isChecked(), mSensor.isChecked());
             }
         });
     }
@@ -70,6 +70,8 @@ public class EditTwitteeActivity extends ActionBarActivity implements MyResultRe
                 // do something interesting
                 // hide progress
                 finish();
+                Intent intent = new Intent(this,MainActivity.class);
+                startActivity(intent);
                 break;
             case ERROR:
                 // handle the error;
@@ -79,15 +81,14 @@ public class EditTwitteeActivity extends ActionBarActivity implements MyResultRe
 
     // send twit to server
     void sendMicropost(String content, Boolean anonymous, Boolean sensor) {
-        String url = "https://rails-tutorial-cosimo-dw.c9.io/microposts/new.json";
+        String url = "https://rails-tutorial-cosimo-dw.c9.io/microposts.json";
         Map<String,String> params = new HashMap<String,String>();
         params.put("micropost[content]", content);
         params.put("micropost[anony]", anonymous?"1":"0");
         //TODO environment
-        String environment = null;
+        String environment = "";
         if (sensor) environment = "usc";
         params.put("micropost[environment]",environment);
-        params.put("[remember_me]", "1");
 
         Intent intent = HTTPRequest.makeIntent(this, this, url, "POST", params);
 

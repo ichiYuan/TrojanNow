@@ -24,11 +24,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="New ToggleButton"
-        android:id="@+id/toggleButton"
+        android:id="@+id/like_button"
         android:layout_below="@+id/micropost_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:textOff="Like"
-        android:textOn="Dislike" />
+        android:textOn="Cancel" />
 
 </RelativeLayout>

@@ -5,13 +5,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 
 import com.example.ichi.clientcontroller.MyResultReceiver;
@@ -24,7 +28,9 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A fragment representing a list of Items.
@@ -35,7 +41,8 @@ import java.util.List;
  */
 public class UserFragment extends ListFragment implements MyResultReceiver.Receiver {
 
-    private int id;
+    private boolean following = true;
+    private int id = 0;
 
     private OnUserFragmentInteractionListener mListener;
 
@@ -45,12 +52,18 @@ public class UserFragment extends ListFragment implements MyResultReceiver.Recei
     // TODO: Rename and change types of parameters
     public static UserFragment newInstance(int id) {
         UserFragment fragment = new UserFragment();
-        fragment.setId(id);
+        fragment.id = id;
         return fragment;
     }
 
     public void setId(int ID) {
         id = ID;
+        sendRequestUsers();
+    }
+
+    private void setFollowing(boolean following) {
+        this.following = following;
+        sendRequestUsers();
     }
 
     public void loadData(String content) {
@@ -76,7 +89,8 @@ public class UserFragment extends ListFragment implements MyResultReceiver.Recei
         mUsers = new ArrayList<UserItem>();
         mAdapter = new UserAdapter(mUsers);
         setListAdapter(mAdapter);
-        sendRequestUsers(true);
+
+        sendRequestUsers();
     }
 
     @Override
@@ -89,7 +103,7 @@ public class UserFragment extends ListFragment implements MyResultReceiver.Recei
             @Override
             public void onClick(View v)
             {
-                sendRequestUsers(true);
+                setFollowing(true);
             }
         });
         button = (Button) myFragmentView.findViewById(R.id.followers_button);
@@ -98,7 +112,27 @@ public class UserFragment extends ListFragment implements MyResultReceiver.Recei
             @Override
             public void onClick(View v)
             {
-                sendRequestUsers(false);
+                setFollowing(false);
+            }
+        });
+
+        final EditText mEditText = (EditText) myFragmentView.findViewById(R.id.makeSearch);
+        mEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    sendSearchUsers(v.getText().toString());
+
+                    return true;
+                }
+                return false;
+            }
+        });
+        mEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus)
+                    sendSearchUsers(mEditText.getText().toString());
             }
         });
 
@@ -132,10 +166,18 @@ public class UserFragment extends ListFragment implements MyResultReceiver.Recei
         }
     }
 
-    public void sendRequestUsers(boolean following) {
+    public void sendRequestUsers() {
         if (id < 0)
             return;
         String url = "https://rails-tutorial-cosimo-dw.c9.io/users/"+id+"/"+(following?"following":"followers")+".json";
+
+        Intent intent = HTTPRequest.makeIntent(getActivity(), this, url, "GET", null);
+
+        getActivity().startService(intent);
+    }
+
+    private void sendSearchUsers(String text) {
+        String url = "https://rails-tutorial-cosimo-dw.c9.io/users.json?name="+text;
 
         Intent intent = HTTPRequest.makeIntent(getActivity(), this, url, "GET", null);
 
@@ -146,6 +188,7 @@ public class UserFragment extends ListFragment implements MyResultReceiver.Recei
         int id;
         String name;
         String url;
+        boolean following;
     }
 
     private class UserAdapter extends ArrayAdapter<UserItem>{
@@ -160,12 +203,44 @@ public class UserFragment extends ListFragment implements MyResultReceiver.Recei
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.user_item, null);
             }
 
-            UserItem User = getItem(position);
+            UserItem user = getItem(position);
 
             TextView senderText = (TextView)convertView.findViewById(R.id.user_name);
-            senderText.setText(User.name);
+            senderText.setText(user.name);
+
+            ToggleButton button = (ToggleButton) convertView.findViewById(R.id.follow_button);
+            button.setChecked(user.following);
+            button.setOnClickListener(new FollowButton(user));
 
             return convertView;
+        }
+    }
+
+    private class FollowButton implements View.OnClickListener, MyResultReceiver.Receiver {
+        UserItem user;
+        FollowButton(UserItem user) {
+            this.user = user;
+        }
+        @Override
+        public void onClick(View v) {
+            if (!user.following) {
+                String url = "https://rails-tutorial-cosimo-dw.c9.io/relationships.json";
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("followed_id",String.valueOf(user.id));
+                Intent intent = HTTPRequest.makeIntent(getActivity(),this,url,"POST",params);
+                getActivity().startService(intent);
+            }
+            else {
+                String url = "https://rails-tutorial-cosimo-dw.c9.io/relationships/"+user.id+".json";
+                Intent intent = HTTPRequest.makeIntent(getActivity(),this,url,"DELETE",null);
+                getActivity().startService(intent);
+            }
+            user.following = !user.following;
+        }
+
+        @Override
+        public void onReceiveResult(int resultCode, Bundle resultData) {
+
         }
     }
 
@@ -195,7 +270,7 @@ public class UserFragment extends ListFragment implements MyResultReceiver.Recei
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onUserFragmentInteraction(mUsers.get(position).url);
+            mListener.onUserFragmentInteraction(mUsers.get(position).id,mUsers.get(position).name);
         }
     }
 
@@ -211,7 +286,7 @@ public class UserFragment extends ListFragment implements MyResultReceiver.Recei
      */
     public interface OnUserFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onUserFragmentInteraction(String id);
+        public void onUserFragmentInteraction(int id, String name);
     }
 
 }

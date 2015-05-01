@@ -5,6 +5,10 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.example.ichi.clientcontroller.MyResultReceiver;
 import com.example.ichi.servercomm.HTTPRequest;
@@ -14,11 +18,28 @@ import java.util.Map;
 
 
 public class EditMsgActivity extends ActionBarActivity implements MyResultReceiver.Receiver {
-
+    private int receiverID;
+    private String name;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_msg);
+        Bundle b = getIntent().getExtras();
+        receiverID = b.getInt("id");
+        name = b.getString("name");
+
+        TextView textView = (TextView) findViewById(R.id.receiver_name);
+        textView.setText(name);
+
+        final EditText editText = (EditText) findViewById(R.id.message);
+
+        Button button = (Button) findViewById(R.id.post_message);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessage(editText.getText().toString());
+            }
+        });
     }
 
 
@@ -52,6 +73,7 @@ public class EditMsgActivity extends ActionBarActivity implements MyResultReceiv
             case FINISHED:
                 // do something interesting
                 // hide progress
+                finish();
                 break;
             case ERROR:
                 // handle the error;
@@ -60,11 +82,11 @@ public class EditMsgActivity extends ActionBarActivity implements MyResultReceiv
     }
 
     // send message to server
-    void sendMessage(String receiverID, String content) {
-        String url = "https://rails-tutorial-cosimo-dw.c9.io/messages/new.json";
+    void sendMessage(String content) {
+        String url = "https://rails-tutorial-cosimo-dw.c9.io/messages.json";
         Map<String,String> params = new HashMap<String,String>();
         params.put("message[content]", content);
-        params.put("message[receiver_id]",receiverID);
+        params.put("message[receiver_id]",String.valueOf(receiverID));
 
         Intent intent = HTTPRequest.makeIntent(this, this, url, "POST", params);
 

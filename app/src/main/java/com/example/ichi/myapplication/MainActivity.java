@@ -150,13 +150,21 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     @Override
-    public void onMsgFragmentInteraction(String id) {
-
+    public void onMsgFragmentInteraction(int id, String name) {
+        Intent intent = new Intent();
+        intent.setClass(this,EditMsgActivity.class);
+        intent.putExtra("id",id);
+        intent.putExtra("name",name);
+        startActivity(intent);
     }
 
     @Override
-    public void onUserFragmentInteraction(String id) {
-
+    public void onUserFragmentInteraction(int id, String name) {
+        Intent intent = new Intent();
+        intent.setClass(this,ProfileActivity.class);
+        intent.putExtra("id",id);
+        intent.putExtra("name",name);
+        startActivity(intent);
     }
 
     /**
@@ -285,7 +293,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                         id = curUser.id;
                         MicropostFragment frg = (MicropostFragment)mSectionsPagerAdapter.getRegisteredFragment(0);
                         if (frg != null)
-                            frg.sendRequestMicroposts();
+                            frg.setId(id);
                         UserFragment frg2 = (UserFragment)mSectionsPagerAdapter.getRegisteredFragment(1);
                         if (frg2 != null)
                             frg2.setId(id);

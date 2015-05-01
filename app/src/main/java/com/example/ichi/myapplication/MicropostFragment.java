@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 
 import com.example.ichi.clientcontroller.MyResultReceiver;
@@ -25,7 +26,9 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A fragment representing a list of Items.
@@ -36,7 +39,8 @@ import java.util.List;
  */
 public class MicropostFragment extends ListFragment implements MyResultReceiver.Receiver {
 
-    private int id;
+    private int mode = 0;
+    private int id = 0;
 
     private OnMicropostFragmentInteractionListener mListener;
 
@@ -46,12 +50,18 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
     // TODO: Rename and change types of parameters
     public static MicropostFragment newInstance(int id) {
         MicropostFragment fragment = new MicropostFragment();
-        fragment.setId(id);
+        fragment.id = id;
         return fragment;
     }
 
     public void setId(int ID) {
         id = ID;
+        sendRequestMicroposts();
+    }
+
+    private void setMode(int mode) {
+        this.mode = mode;
+        sendRequestMicroposts();
     }
 
     public void loadData(String content) {
@@ -94,8 +104,37 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
                 Intent intent = new Intent();
                 intent.setClass(getActivity(),EditTwitteeActivity.class);
                 startActivity(intent);
+                getActivity().finish();
             }
 
+        });
+
+        Button button = (Button) myFragmentView.findViewById(R.id.feed_post_button);
+        button.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                setMode(0);
+            }
+        });
+        button = (Button) myFragmentView.findViewById(R.id.anony_post_button);
+        button.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                setMode(1);
+            }
+        });
+        button = (Button) myFragmentView.findViewById(R.id.my_post_button);
+        button.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                setMode(2);
+            }
         });
         return myFragmentView;
     }
@@ -134,7 +173,18 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
     public void sendRequestMicroposts() {
         if (id < 0)
             return;
-        String url = "https://rails-tutorial-cosimo-dw.c9.io/users/"+id+"/microposts.json";
+        String url = "https://rails-tutorial-cosimo-dw.c9.io/anonyposts.json";
+        switch(mode) {
+            case 0:
+                url = "https://rails-tutorial-cosimo-dw.c9.io/users/"+id+"/feed.json";
+                break;
+            case 1:
+                url = "https://rails-tutorial-cosimo-dw.c9.io/anonyposts.json";
+                break;
+            case 2:
+                url = "https://rails-tutorial-cosimo-dw.c9.io/users/"+id+"/microposts.json";
+                break;
+        }
 
         Intent intent = HTTPRequest.makeIntent(getActivity(), this, url, "GET", null);
 
@@ -147,6 +197,7 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
         String display_user;
         String environment;
         String url;
+        boolean liked;
     }
 
     private class MicropostAdapter extends ArrayAdapter<MicropostItem>{
@@ -161,7 +212,7 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.micropost_item, null);
             }
 
-            MicropostItem micropost = getItem(position);
+            final MicropostItem micropost = getItem(position);
 
             TextView nameText = (TextView)convertView.findViewById(R.id.micropost_user);
             nameText.setText(micropost.display_user);
@@ -169,7 +220,39 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
             TextView contentText = (TextView)convertView.findViewById(R.id.micropost_content);
             contentText.setText(micropost.content);
 
+            ToggleButton button = (ToggleButton) convertView.findViewById(R.id.like_button);
+            button.setChecked(micropost.liked);
+            button.setOnClickListener(new LikeButton(micropost));
+
             return convertView;
+        }
+
+        private class LikeButton implements View.OnClickListener, MyResultReceiver.Receiver {
+            MicropostItem micropost;
+            LikeButton(MicropostItem micropost) {
+                this.micropost = micropost;
+            }
+            @Override
+            public void onClick(View v) {
+                if (!micropost.liked) {
+                    String url = "https://rails-tutorial-cosimo-dw.c9.io/likes.json";
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("micropost_id",String.valueOf(micropost.id));
+                    Intent intent = HTTPRequest.makeIntent(getActivity(),this,url,"POST",params);
+                    getActivity().startService(intent);
+                }
+                else {
+                    String url = "https://rails-tutorial-cosimo-dw.c9.io/likes/"+micropost.id+".json";
+                    Intent intent = HTTPRequest.makeIntent(getActivity(),this,url,"DELETE",null);
+                    getActivity().startService(intent);
+                }
+                micropost.liked = !micropost.liked;
+            }
+
+            @Override
+            public void onReceiveResult(int resultCode, Bundle resultData) {
+
+            }
         }
     }
 

@@ -7,7 +7,8 @@
         android:id="@+id/makeSearch" style="?android:textAppearanceSmall"
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_marginTop="0dp" android:hint="search friend"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:singleLine="true" />
 
     <LinearLayout
         android:orientation="horizontal"

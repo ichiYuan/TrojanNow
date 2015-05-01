@@ -8,21 +8,22 @@
     android:background="@drawable/bg"
     tools:context="com.example.ichi.myapplication.EditMsgActivity">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Large Text"
+        android:id="@+id/receiver_name" />
+
     <EditText
         android:layout_width="match_parent"
         android:layout_height="180px"
-        android:id="@+id/twittee"
+        android:id="@+id/message"
         android:hint="Enter your message"
         />
 
-    <Spinner
-        android:id="@+id/spinner2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="left"/>
-
     <Button
-        android:id="@+id/post_twittee" style="?android:textAppearanceSmall"
+        android:id="@+id/post_message" style="?android:textAppearanceSmall"
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_marginTop="16dp" android:text="Send Message"
         android:background="@android:drawable/btn_default"

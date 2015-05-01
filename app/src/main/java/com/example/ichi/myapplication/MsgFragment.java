@@ -35,7 +35,8 @@ import java.util.List;
  */
 public class MsgFragment extends ListFragment implements MyResultReceiver.Receiver {
 
-    private int id;
+    private boolean inbox = true;
+    private int id = 0;
 
     private OnMsgFragmentInteractionListener mListener;
 
@@ -45,12 +46,18 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
     // TODO: Rename and change types of parameters
     public static MsgFragment newInstance(int id) {
         MsgFragment fragment = new MsgFragment();
-        fragment.setId(id);
+        fragment.id = id;
         return fragment;
     }
 
     public void setId(int ID) {
         id = ID;
+        sendRequestMessages();
+    }
+
+    private void setInbox(boolean inbox) {
+        this.inbox = inbox;
+        sendRequestMessages();
     }
 
     public void loadData(String content) {
@@ -76,7 +83,8 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
         mMessages = new ArrayList<MsgItem>();
         mAdapter = new MsgAdapter(mMessages);
         setListAdapter(mAdapter);
-        sendRequestMessages(true);
+
+        sendRequestMessages();
     }
 
     @Override
@@ -89,7 +97,7 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
             @Override
             public void onClick(View v)
             {
-                sendRequestMessages(true);
+                setInbox(true);
             }
         });
         button = (Button) myFragmentView.findViewById(R.id.outbox_button);
@@ -98,7 +106,7 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
             @Override
             public void onClick(View v)
             {
-                sendRequestMessages(false);
+                setInbox(false);
             }
         });
 
@@ -132,7 +140,7 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
         }
     }
 
-    public void sendRequestMessages(boolean inbox) {
+    public void sendRequestMessages() {
         if (id < 0)
             return;
         String url = "https://rails-tutorial-cosimo-dw.c9.io/users/"+id+"/"+(inbox?"inbox":"outbox")+".json";
@@ -143,7 +151,8 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
     }
 
     private class MsgItem{
-        int id;
+        int target_id;
+        String target_name;
         String receiver_name;
         String content;
         String sender_name;
@@ -203,7 +212,7 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onMsgFragmentInteraction(mMessages.get(position).url);
+            mListener.onMsgFragmentInteraction(mMessages.get(position).target_id, mMessages.get(position).target_name);
         }
     }
 
@@ -218,8 +227,7 @@ public class MsgFragment extends ListFragment implements MyResultReceiver.Receiv
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnMsgFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onMsgFragmentInteraction(String id);
+        public void onMsgFragmentInteraction(int id, String name);
     }
 
 }

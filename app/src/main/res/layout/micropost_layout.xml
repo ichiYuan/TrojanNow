@@ -8,6 +8,34 @@
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_marginTop="0dp" android:text="Make your own post"
         android:textStyle="bold" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Feed"
+            android:id="@+id/feed_post_button"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Anony"
+            android:id="@+id/anony_post_button"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="My"
+            android:id="@+id/my_post_button"
+            android:layout_weight="1" />
+    </LinearLayout>
+
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
