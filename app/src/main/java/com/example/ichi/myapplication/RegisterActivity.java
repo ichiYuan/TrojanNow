@@ -45,10 +45,41 @@ import java.util.Map;
 
 public class RegisterActivity extends ActionBarActivity implements MyResultReceiver.Receiver{
 
+    private EditText mEmail;
+    private EditText mUsername;
+    private EditText mFirstName;
+    private EditText mLastName;
+    private EditText mPassword;
+    private EditText mConfirm;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        mEmail = (EditText) findViewById(R.id.email);
+        mUsername = (EditText) findViewById(R.id.name);
+        mFirstName = (EditText) findViewById(R.id.firstName);
+        mLastName = (EditText) findViewById(R.id.lastName);
+        mPassword = (EditText) findViewById(R.id.password);
+        mConfirm = (EditText) findViewById(R.id.password_confirm);
+        Button button = (Button) findViewById(R.id.register_button);
+        button.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String email = mEmail.getText().toString();
+                String password = mPassword.getText().toString();
+                String confirm = mConfirm.getText().toString();
+                if (!password.equals(confirm)) {
+                    mConfirm.setError("Confirmation not identical");
+                    return;
+                }
+                String firstName = mFirstName.getText().toString();
+                String lastName = mLastName.getText().toString();
+                String username = mUsername.getText().toString();
+
+                sendRegistration(email,password,firstName,lastName,username);
+            }
+        });
     }
 
 
@@ -80,18 +111,7 @@ public class RegisterActivity extends ActionBarActivity implements MyResultRecei
                 break;
             case FINISHED:
                 // do something interesting
-                ArrayList<String> results = resultData.getStringArrayList("results");
-                if (results != null) {
-                    Log.d("Debug:\t",results.get(0));
-                    if (results.get(0).startsWith("INVALID")) {
-                        Log.d("Debug:\t",results.get(0));
-                        //TODO
-                    }
-                    else {
-
-                        finish();
-                    }
-                }
+                finish();
                 //showProgress(false);
 
                 // hide progress
@@ -104,7 +124,7 @@ public class RegisterActivity extends ActionBarActivity implements MyResultRecei
     // send registration info to the server
 
     void sendRegistration(String email, String password, String first_name, String last_name, String user_name) {
-        String url = "https://rails-tutorial-cosimo-dw.c9.io/users/new.json";
+        String url = "https://rails-tutorial-cosimo-dw.c9.io/users.json";
         Map<String, String> params = new HashMap<String, String>();
         params.put("user[name]",user_name);
         params.put("user[first_name]",first_name);

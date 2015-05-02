@@ -2,10 +2,12 @@ package com.example.ichi.clientcontroller;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.Pair;
 
+import com.example.ichi.sensor.SensorController;
 import com.example.ichi.servercomm.CollectionUtils;
 import com.example.ichi.servercomm.HTTPRequest;
 import com.example.ichi.session.SessionController;
@@ -33,9 +35,12 @@ public class TaskService extends IntentService {
         super("TaskService");
     }
 
+    private SensorController sensor = null;
+
     public void onCreate(){
         super.onCreate();
         new SessionController(getApplicationContext());
+        sensor = new SensorController((SensorManager)getSystemService(SENSOR_SERVICE));
     }
 
     protected void onHandleIntent(Intent intent) {
@@ -59,6 +64,10 @@ public class TaskService extends IntentService {
         }
         if (command.equals("sensor")) {
             // get sensors' data
+            if (sensor != null) {
+                b.putString("sensors",""+sensor.getTemperature());
+                receiver.send(STATUS_FINISHED, b);
+            }
         }
     }
 }

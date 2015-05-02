@@ -64,10 +64,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
     private View mProgressView;
     private View mLoginFormView;
 
-    private EditText mUsername;
-    private EditText mFirstName;
-    private EditText mLastName;
-    private EditText mConfirm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +94,15 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
             }
         });
 
+        Button button = (Button) findViewById(R.id.email_register_button);
+        button.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(v.getContext(),RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
     }

@@ -3,16 +3,20 @@ package com.example.ichi.myapplication;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 
 import com.example.ichi.clientcontroller.MyResultReceiver;
+import com.example.ichi.sensor.SensorController;
 import com.example.ichi.servercomm.HTTPRequest;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +26,7 @@ public class EditTwitteeActivity extends ActionBarActivity implements MyResultRe
     CheckBox mAnonymous;
     CheckBox mSensor;
     Button mPostButton;
+    private String sensorData = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +39,15 @@ public class EditTwitteeActivity extends ActionBarActivity implements MyResultRe
             @Override
             public void onClick(View v) {
                 sendMicropost(mText.getText().toString(), mAnonymous.isChecked(), mSensor.isChecked());
+            }
+        });
+
+        mSensor.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    sendSensorRequest();
+                }
             }
         });
     }
@@ -69,9 +83,16 @@ public class EditTwitteeActivity extends ActionBarActivity implements MyResultRe
             case FINISHED:
                 // do something interesting
                 // hide progress
-                finish();
-                Intent intent = new Intent(this,MainActivity.class);
-                startActivity(intent);
+                String sensor = resultData.getString("sensors");
+                if (sensor != null) {
+                    sensorData = sensor + "°C";
+                    Log.d("DEBUG:",sensorData);
+                }
+                else {
+                    finish();
+                    Intent intent = new Intent(this, MainActivity.class);
+                    startActivity(intent);
+                }
                 break;
             case ERROR:
                 // handle the error;
@@ -85,13 +106,16 @@ public class EditTwitteeActivity extends ActionBarActivity implements MyResultRe
         Map<String,String> params = new HashMap<String,String>();
         params.put("micropost[content]", content);
         params.put("micropost[anony]", anonymous?"1":"0");
-        //TODO environment
-        String environment = "";
-        if (sensor) environment = "usc";
-        params.put("micropost[environment]",environment);
+        if (sensor)
+            params.put("micropost[environment]",sensorData);
 
         Intent intent = HTTPRequest.makeIntent(this, this, url, "POST", params);
 
+        startService(intent);
+    }
+
+    void sendSensorRequest() {
+        Intent intent = SensorController.makeIntent(this,this);
         startService(intent);
     }
 }

@@ -220,6 +220,12 @@ public class MicropostFragment extends ListFragment implements MyResultReceiver.
             TextView contentText = (TextView)convertView.findViewById(R.id.micropost_content);
             contentText.setText(micropost.content);
 
+            TextView environmentText = (TextView)convertView.findViewById(R.id.environment);
+            if (micropost.environment != null)
+                environmentText.setText(micropost.environment);
+            else
+                environmentText.setVisibility(View.INVISIBLE);
+
             ToggleButton button = (ToggleButton) convertView.findViewById(R.id.like_button);
             button.setChecked(micropost.liked);
             button.setOnClickListener(new LikeButton(micropost));
